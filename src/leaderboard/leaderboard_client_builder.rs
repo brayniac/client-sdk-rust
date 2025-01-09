@@ -17,6 +17,8 @@ use tonic::transport::Channel;
 
 pub struct LeaderboardClientBuilder<State>(pub State);
 
+pub struct NeedsConfiguration { }
+
 pub struct NeedsCredentialProvider {
     configuration: Configuration,
 }
