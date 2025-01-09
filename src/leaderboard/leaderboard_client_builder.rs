@@ -28,6 +28,17 @@ pub struct ReadyToBuild {
     credential_provider: CredentialProvider,
 }
 
+impl LeaderboardClientBuilder<NeedsConfiguration> {
+    pub fn configuration(
+        self,
+        configuration: impl Into<Configuration>,
+    ) -> LeaderboardClientBuilder<NeedsCredentialProvider> {
+        LeaderboardClientBuilder(NeedsCredentialProvider {
+            configuration: configuration.into(),
+        })
+    }
+}
+
 impl LeaderboardClientBuilder<NeedsCredentialProvider> {
     pub fn credential_provider(
         self,
