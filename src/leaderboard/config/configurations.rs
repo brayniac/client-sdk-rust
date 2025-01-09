@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::cache::Configuration;
+use crate::leaderboard::Configuration;
 use crate::config::grpc_configuration::GrpcConfiguration;
 use crate::config::transport_strategy::TransportStrategy;
 
