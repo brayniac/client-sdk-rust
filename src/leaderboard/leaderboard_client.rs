@@ -2,7 +2,7 @@ use std::time::Duration;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::AtomicUsize;
 use crate::leaderboard::MomentoRequest;
-use crate::leaderboard::messages::data::get_rank::{GetRankRequest, GetRankResponse, Order};
+use crate::leaderboard::messages::data::get_rank::{GetRankRequest, GetRankResponse};
 use crate::leaderboard::messages::data::upsert_elements::UpsertElementsRequest;
 use momento_protos::common::Empty;
 use crate::MomentoResult;
@@ -17,6 +17,8 @@ use momento_protos::leaderboard::leaderboard_client::LeaderboardClient as SLbCli
 use tonic::codegen::InterceptedService;
 
 static NEXT_DATA_CLIENT_INDEX: AtomicUsize = AtomicUsize::new(0);
+
+pub use crate::leaderboard::messages::data::{Order, IntoIds};
 
 #[derive(Clone, Debug)]
 pub struct LeaderboardClient {
@@ -41,14 +43,14 @@ impl LeaderboardClient {
     //     request.send(self).await
     // }
 
-    pub async fn get_rank(
+    pub async fn get_rank<T: IntoIds>(
         &self,
         cache_name: String,
         leaderboard: String,
-        ids: Vec<u32>,
+        ids: impl IntoIds,
         order: Order,
     ) -> MomentoResult<GetRankResponse> {
-        let request = GetRankRequest::new(cache_name, leaderboard, ids, order);
+        let request = GetRankRequest::new(cache_name, leaderboard, ids.into_ids(), order);
         request.send(self).await
     }
 
