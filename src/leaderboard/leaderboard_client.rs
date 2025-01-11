@@ -43,9 +43,9 @@ impl LeaderboardClient {
 
     pub async fn get_rank<T: IntoIds>(
         &self,
-        cache_name: impl Into<String>,
-        leaderboard: impl Into<String>,
-        ids: impl IntoIds,
+        cache_name: String,
+        leaderboard: String,
+        ids: Vec<u32>,
         order: Order,
     ) -> MomentoResult<GetRankResponse> {
         let request = GetRankRequest::new(cache_name, leaderboard, ids, order);

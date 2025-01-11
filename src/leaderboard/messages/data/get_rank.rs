@@ -46,10 +46,10 @@ pub struct RankedElement {
     pub score: f64,
 }
 
-pub struct GetRankRequest<T: IntoIds> {
+pub struct GetRankRequest {
     cache_name: String,
     leaderboard: String,
-    ids: T,
+    ids: Vec<u32>,
     order: Order,
 }
 
@@ -57,12 +57,12 @@ pub struct GetRankResponse {
     elements: Vec<RankedElement>,
 }
 
-impl<T: IntoIds> GetRankRequest<T> {
+impl GetRankRequest {
     /// Constructs a new SortedSetPutElementsRequest.
-    pub fn new(cache_name: impl Into<String>, leaderboard: impl Into<String>, ids: T, order: Order) -> Self {
+    pub fn new(cache_name: String, leaderboard: String, ids: Vec<u32>, order: Order) -> Self {
         Self {
-            cache_name: cache_name.into(),
-            leaderboard: leaderboard.into(),
+            cache_name,
+            leaderboard,
             ids,
             order,
         }
@@ -83,8 +83,8 @@ impl GetRankResponse {
 //     }
 // }
 
-impl<T: IntoIds> MomentoRequest
-    for GetRankRequest<T>
+impl MomentoRequest
+    for GetRankRequest
 {
     type Response = GetRankResponse;
 
