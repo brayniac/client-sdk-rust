@@ -9,6 +9,6 @@ mod config;
 pub use config::configuration::Configuration;
 pub use config::configurations;
 
-mod messages;
+pub mod messages;
 
 pub use messages::MomentoRequest;
