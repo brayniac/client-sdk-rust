@@ -2,7 +2,7 @@ use std::time::Duration;
 use std::sync::atomic::Ordering;
 use std::sync::atomic::AtomicUsize;
 use crate::leaderboard::MomentoRequest;
-use crate::leaderboard::messages::data::get_rank::{GetRankRequest, GetRankResponse, IntoIds, Order};
+use crate::leaderboard::messages::data::get_rank::{GetRankRequest, GetRankResponse, Order};
 use crate::leaderboard::messages::data::upsert_elements::UpsertElementsRequest;
 use momento_protos::common::Empty;
 use crate::MomentoResult;
@@ -41,7 +41,7 @@ impl LeaderboardClient {
     //     request.send(self).await
     // }
 
-    pub async fn get_rank<T: IntoIds>(
+    pub async fn get_rank(
         &self,
         cache_name: String,
         leaderboard: String,
