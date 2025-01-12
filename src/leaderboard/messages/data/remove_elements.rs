@@ -12,7 +12,11 @@ pub struct RemoveElementsRequest {
 
 impl RemoveElementsRequest {
     /// Constructs a new SortedSetPutElementsRequest.
-    pub fn new(cache_name: impl Into<String>, leaderboard: impl Into<String>, ids: impl Into<Vec<u32>>) -> Self {
+    pub fn new(
+        cache_name: impl Into<String>,
+        leaderboard: impl Into<String>,
+        ids: impl Into<Vec<u32>>,
+    ) -> Self {
         Self {
             cache_name: cache_name.into(),
             leaderboard: leaderboard.into(),

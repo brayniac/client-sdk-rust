@@ -15,6 +15,7 @@ use crate::leaderboard::messages::data::get_leaderboard_length::{
     GetLeaderboardLengthRequest, GetLeaderboardLengthResponse,
 };
 use crate::leaderboard::messages::data::get_rank::{GetRankRequest, GetRankResponse};
+use crate::leaderboard::messages::data::remove_elements::RemoveElementsRequest;
 use crate::leaderboard::messages::data::upsert_elements::{IntoElements, UpsertElementsRequest};
 use crate::leaderboard::{Configuration, MomentoRequest};
 use crate::MomentoResult;
@@ -102,6 +103,16 @@ impl LeaderboardClient {
         order: Order,
     ) -> MomentoResult<GetRankResponse> {
         let request = GetRankRequest::new(cache_name, leaderboard, ids, order);
+        request.send(self).await
+    }
+
+    pub async fn remove_elements<T: Into<Vec<u32>>>(
+        &self,
+        cache_name: impl Into<String>,
+        leaderboard: impl Into<String>,
+        ids: T,
+    ) -> MomentoResult<Empty> {
+        let request = RemoveElementsRequest::new(cache_name, leaderboard, ids, order);
         request.send(self).await
     }
 
