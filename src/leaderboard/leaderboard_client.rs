@@ -112,7 +112,7 @@ impl LeaderboardClient {
         leaderboard: impl Into<String>,
         ids: T,
     ) -> MomentoResult<Empty> {
-        let request = RemoveElementsRequest::new(cache_name, leaderboard, ids, order);
+        let request = RemoveElementsRequest::new(cache_name, leaderboard, ids);
         request.send(self).await
     }
 
