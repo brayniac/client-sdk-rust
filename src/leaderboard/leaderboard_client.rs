@@ -54,11 +54,11 @@ impl LeaderboardClient {
         request.send(self).await
     }
 
-    pub async fn get_by_rank(
+    pub async fn get_by_rank<T: Into<RankRange>>(
         &self,
         cache_name: impl Into<String>,
         leaderboard: impl Into<String>,
-        rank_range: impl Into<Option<RankRange>>,
+        rank_range: Option<T>,
         order: Order,
     ) -> MomentoResult<GetByRankResponse> {
         let request = GetByRankRequest::new(cache_name, leaderboard, rank_range, order);

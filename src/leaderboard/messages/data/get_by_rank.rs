@@ -41,16 +41,16 @@ pub struct GetByRankResponse {
 
 impl GetByRankRequest {
     /// Constructs a new SortedSetPutElementsRequest.
-    pub fn new(
+    pub fn new<T: Into<RankRange>>(
         cache_name: impl Into<String>,
         leaderboard: impl Into<String>,
-        rank_range: impl Into<Option<RankRange>>,
+        rank_range: Option<T>,
         order: Order,
     ) -> Self {
         Self {
             cache_name: cache_name.into(),
             leaderboard: leaderboard.into(),
-            rank_range: rank_range.into(),
+            rank_range: rank_range.map(|v| v.into()),
             order,
         }
     }
