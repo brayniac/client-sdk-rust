@@ -1,9 +1,7 @@
 use super::{IntoIds, Order, RankedElement};
-
 use crate::leaderboard::MomentoRequest;
 use crate::utils::prep_request_with_timeout;
-use crate::LeaderboardClient;
-use crate::MomentoResult;
+use crate::{LeaderboardClient, MomentoResult};
 
 pub struct GetRankRequest {
     cache_name: String,

@@ -1,7 +1,7 @@
 use crate::leaderboard::MomentoRequest;
 use crate::utils::prep_request_with_timeout;
-use crate::LeaderboardClient;
-use crate::MomentoResult;
+use crate::{LeaderboardClient, MomentoResult};
+
 use momento_protos::common::Empty;
 use momento_protos::leaderboard::Element as ProtoElement;
 

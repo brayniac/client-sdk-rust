@@ -1,5 +1,4 @@
-use crate::LeaderboardClient;
-use crate::MomentoResult;
+use crate::{LeaderboardClient, MomentoResult};
 
 /// A trait that allows Momento request types to define their interaction with the gRPC client.
 pub trait MomentoRequest {

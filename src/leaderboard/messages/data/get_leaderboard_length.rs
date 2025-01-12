@@ -9,14 +9,14 @@ use tonic::Request;
 ///
 /// * `cache_name` - The name of the cache containing the leaderboard.
 /// * `leaderboard` - The name of the leaderboard.
-pub struct DeleteLeaderboardRequest {
+pub struct GetLeaderboardLengthRequest {
     /// The name of the cache containing the leaderboard.
     pub cache_name: String,
     /// The leaderboard to be deleted.
     pub leaderboard: String,
 }
 
-impl DeleteLeaderboardRequest {
+impl GetLeaderboardLengthRequest {
     /// Constructs a new `DeleteLeaderboardRequest`.
     pub fn new(cache_name: impl Into<String>, leaderboard: impl Into<String>) -> Self {
         Self {
@@ -26,26 +26,38 @@ impl DeleteLeaderboardRequest {
     }
 }
 
-impl MomentoRequest for DeleteLeaderboardRequest {
-    type Response = DeleteLeaderboardResponse;
+impl MomentoRequest for GetLeaderboardLengthRequest {
+    type Response = GetLeaderboardLengthResponse;
 
     async fn send(self, leaderboard_client: &LeaderboardClient) -> MomentoResult<Self::Response> {
         let cache_name = &self.cache_name;
 
         utils::is_cache_name_valid(cache_name)?;
-        let request = Request::new(momento_protos::leaderboard::DeleteLeaderboardRequest {
+        let request = Request::new(momento_protos::leaderboard::GetLeaderboardLengthRequest {
             cache_name: cache_name.to_string(),
             leaderboard: self.leaderboard.to_string(),
         });
 
-        let _ = leaderboard_client
+        let response = leaderboard_client
             .next_data_client()
-            .delete_leaderboard(request)
-            .await?;
-        Ok(Self::Response {})
+            .get_leaderboard_length(request)
+            .await?
+            .into_inner();
+
+        Ok(Self::Response {
+            count: response.count,
+        })
     }
 }
 
 /// The response type for a successful `DeleteLeaderboardRequest`
 #[derive(Debug, PartialEq, Eq)]
-pub struct DeleteLeaderboardResponse {}
+pub struct GetLeaderboardLengthResponse {
+    count: u32,
+}
+
+impl GetLeaderboardLengthResponse {
+    pub fn count(&self) -> u32 {
+        self.count
+    }
+}

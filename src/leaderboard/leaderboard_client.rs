@@ -1,30 +1,32 @@
 use crate::grpc::header_interceptor::HeaderInterceptor;
-use crate::leaderboard::leaderboard_client_builder::LeaderboardClientBuilder;
-use crate::leaderboard::leaderboard_client_builder::NeedsConfiguration;
-use crate::leaderboard::messages::data::delete_leaderboard::DeleteLeaderboardRequest;
-use crate::leaderboard::messages::data::delete_leaderboard::DeleteLeaderboardResponse;
-use crate::leaderboard::messages::data::get_by_rank::GetByRankRequest;
-use crate::leaderboard::messages::data::get_by_rank::GetByRankResponse;
-use crate::leaderboard::messages::data::get_by_rank::RankRange;
-use crate::leaderboard::messages::data::get_by_score::GetByScoreRequest;
-use crate::leaderboard::messages::data::get_by_score::GetByScoreResponse;
-use crate::leaderboard::messages::data::get_by_score::ScoreRange;
-use crate::leaderboard::messages::data::get_leaderboard_length::GetLeaderboardLengthRequest;
-use crate::leaderboard::messages::data::get_leaderboard_length::GetLeaderboardLengthResponse;
+use crate::leaderboard::leaderboard_client_builder::{
+    LeaderboardClientBuilder, NeedsConfiguration,
+};
+use crate::leaderboard::messages::data::delete_leaderboard::{
+    DeleteLeaderboardRequest, DeleteLeaderboardResponse,
+};
+use crate::leaderboard::messages::data::get_by_rank::{
+    GetByRankRequest, GetByRankResponse, RankRange,
+};
+use crate::leaderboard::messages::data::get_by_score::{
+    GetByScoreRequest, GetByScoreResponse, ScoreRange,
+};
+use crate::leaderboard::messages::data::get_leaderboard_length::{
+    GetLeaderboardLengthRequest, GetLeaderboardLengthResponse,
+};
 use crate::leaderboard::messages::data::get_rank::{GetRankRequest, GetRankResponse};
-use crate::leaderboard::messages::data::upsert_elements::IntoElements;
-use crate::leaderboard::messages::data::upsert_elements::UpsertElementsRequest;
-use crate::leaderboard::Configuration;
-use crate::leaderboard::MomentoRequest;
+use crate::leaderboard::messages::data::upsert_elements::{IntoElements, UpsertElementsRequest};
+use crate::leaderboard::{Configuration, MomentoRequest};
 use crate::MomentoResult;
+
 use momento_protos::common::Empty;
 use momento_protos::control_client::scs_control_client::ScsControlClient;
 use momento_protos::leaderboard::leaderboard_client::LeaderboardClient as SLbClient;
-use std::sync::atomic::AtomicUsize;
-use std::sync::atomic::Ordering;
-use std::time::Duration;
 use tonic::codegen::InterceptedService;
 use tonic::transport::Channel;
+
+use std::sync::atomic::{AtomicUsize, Ordering};
+use std::time::Duration;
 
 static NEXT_DATA_CLIENT_INDEX: AtomicUsize = AtomicUsize::new(0);
 

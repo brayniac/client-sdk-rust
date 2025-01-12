@@ -2,11 +2,11 @@ use std::time::Duration;
 
 use crate::config::transport_strategy::TransportStrategy;
 
-/// Configuration for a Momento cache client.
+/// Configuration for a Momento leaderboard client.
 ///
 /// Static, versioned configurations are provided for different environments:
 /// ```
-/// use momento::cache::configurations;
+/// use momento::leaderboard::configurations;
 ///
 /// /// Use laptop for local development
 /// let developer_config = configurations::Laptop::latest();
@@ -17,7 +17,7 @@ use crate::config::transport_strategy::TransportStrategy;
 /// If you have specific requirements, configurations can also be constructed manually:
 /// ```
 /// use std::time::Duration;
-/// use momento::cache::Configuration;
+/// use momento::leaderboard::Configuration;
 /// use momento::config::grpc_configuration::{GrpcConfiguration, GrpcConfigurationBuilder};
 /// use momento::config::transport_strategy::TransportStrategy;
 ///

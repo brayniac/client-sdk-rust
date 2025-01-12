@@ -69,7 +69,7 @@ impl InRegion {
 
 /// This config prioritizes keeping p99.9 latencies as low as possible, potentially sacrificing
 /// some throughput to achieve this. Use this config if low latency is more important in
-/// your application than cache availability.
+/// your application than availability.
 pub struct LowLatency {}
 
 impl LowLatency {

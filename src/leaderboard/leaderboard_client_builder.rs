@@ -1,16 +1,13 @@
-use crate::leaderboard::LeaderboardClient;
-
-use momento_protos::leaderboard::leaderboard_client::LeaderboardClient as SLbClient;
-
-use crate::grpc::header_interceptor::HeaderInterceptor;
-use crate::leaderboard::Configuration;
-use crate::{utils, CredentialProvider, MomentoResult};
-use tonic::codegen::InterceptedService;
-
 use crate::config::grpc_configuration::GrpcConfiguration;
 use crate::config::transport_strategy::TransportStrategy;
+use crate::grpc::header_interceptor::HeaderInterceptor;
+use crate::leaderboard::{Configuration, LeaderboardClient};
 use crate::utils::ChannelConnectError;
+use crate::{utils, CredentialProvider, MomentoResult};
+
 use momento_protos::control_client::scs_control_client::ScsControlClient;
+use momento_protos::leaderboard::leaderboard_client::LeaderboardClient as SLbClient;
+use tonic::codegen::InterceptedService;
 use tonic::transport::Channel;
 
 pub struct LeaderboardClientBuilder<State>(pub State);
