@@ -1,9 +1,9 @@
-use momento_protos::leaderboard::Element as ProtoElement;
-use crate::LeaderboardClient;
 use crate::leaderboard::MomentoRequest;
 use crate::utils::prep_request_with_timeout;
-use momento_protos::common::Empty;
+use crate::LeaderboardClient;
 use crate::MomentoResult;
+use momento_protos::common::Empty;
+use momento_protos::leaderboard::Element as ProtoElement;
 
 /// This trait defines an interface for converting a type into a vector of [SortedSetElement].
 pub trait IntoElements: Send {
@@ -16,8 +16,7 @@ pub fn map_and_collect_elements<I>(iter: I) -> Vec<Element>
 where
     I: Iterator<Item = (u32, f64)>,
 {
-    iter.map(|(id, score)| Element { id, score })
-        .collect()
+    iter.map(|(id, score)| Element { id, score }).collect()
 }
 
 impl IntoElements for Vec<(u32, f64)> {
@@ -53,9 +52,7 @@ impl<E: IntoElements> UpsertElementsRequest<E> {
     }
 }
 
-impl<E: IntoElements> MomentoRequest
-    for UpsertElementsRequest<E>
-{
+impl<E: IntoElements> MomentoRequest for UpsertElementsRequest<E> {
     type Response = Empty;
 
     async fn send(self, leaderboard_client: &LeaderboardClient) -> MomentoResult<Self::Response> {
@@ -67,7 +64,13 @@ impl<E: IntoElements> MomentoRequest
             momento_protos::leaderboard::UpsertElementsRequest {
                 cache_name,
                 leaderboard: self.leaderboard,
-                elements: elements.into_iter().map(|v| { ProtoElement { id: v.id, score: v.score }}).collect(),
+                elements: elements
+                    .into_iter()
+                    .map(|v| ProtoElement {
+                        id: v.id,
+                        score: v.score,
+                    })
+                    .collect(),
             },
         )?;
 

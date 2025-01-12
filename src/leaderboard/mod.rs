@@ -1,4 +1,3 @@
-
 mod leaderboard_client;
 mod leaderboard_client_builder;
 

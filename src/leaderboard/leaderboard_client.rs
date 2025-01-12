@@ -1,24 +1,24 @@
-use std::time::Duration;
-use std::sync::atomic::Ordering;
-use std::sync::atomic::AtomicUsize;
-use crate::leaderboard::MomentoRequest;
-use crate::leaderboard::messages::data::get_rank::{GetRankRequest, GetRankResponse};
-use crate::leaderboard::messages::data::upsert_elements::UpsertElementsRequest;
-use momento_protos::common::Empty;
-use crate::MomentoResult;
-use crate::leaderboard::messages::data::upsert_elements::IntoElements;
-use crate::leaderboard::leaderboard_client_builder::NeedsConfiguration;
-use crate::leaderboard::leaderboard_client_builder::LeaderboardClientBuilder;
-use tonic::transport::Channel;
 use crate::grpc::header_interceptor::HeaderInterceptor;
-use momento_protos::control_client::scs_control_client::ScsControlClient;
+use crate::leaderboard::leaderboard_client_builder::LeaderboardClientBuilder;
+use crate::leaderboard::leaderboard_client_builder::NeedsConfiguration;
+use crate::leaderboard::messages::data::get_rank::{GetRankRequest, GetRankResponse};
+use crate::leaderboard::messages::data::upsert_elements::IntoElements;
+use crate::leaderboard::messages::data::upsert_elements::UpsertElementsRequest;
 use crate::leaderboard::Configuration;
+use crate::leaderboard::MomentoRequest;
+use crate::MomentoResult;
+use momento_protos::common::Empty;
+use momento_protos::control_client::scs_control_client::ScsControlClient;
 use momento_protos::leaderboard::leaderboard_client::LeaderboardClient as SLbClient;
+use std::sync::atomic::AtomicUsize;
+use std::sync::atomic::Ordering;
+use std::time::Duration;
 use tonic::codegen::InterceptedService;
+use tonic::transport::Channel;
 
 static NEXT_DATA_CLIENT_INDEX: AtomicUsize = AtomicUsize::new(0);
 
-pub use crate::leaderboard::messages::data::{Order, IntoIds};
+pub use crate::leaderboard::messages::data::{IntoIds, Order};
 
 #[derive(Clone, Debug)]
 pub struct LeaderboardClient {
@@ -30,7 +30,7 @@ pub struct LeaderboardClient {
 
 impl LeaderboardClient {
     pub fn builder() -> LeaderboardClientBuilder<NeedsConfiguration> {
-        LeaderboardClientBuilder(NeedsConfiguration{ })
+        LeaderboardClientBuilder(NeedsConfiguration {})
     }
 
     // pub async fn sorted_set_put_elements<V: IntoBytes>(
@@ -53,7 +53,6 @@ impl LeaderboardClient {
         let request = GetRankRequest::new(cache_name, leaderboard, ids.into_ids(), order);
         request.send(self).await
     }
-
 
     pub async fn upsert_elements<E: IntoElements>(
         &self,

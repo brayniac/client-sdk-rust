@@ -1,8 +1,7 @@
-use momento_protos::control_client;
 use tonic::Request;
 
-use crate::cache::messages::MomentoRequest;
-use crate::{utils, CacheClient, MomentoResult};
+use crate::leaderboard::messages::MomentoRequest;
+use crate::{utils, LeaderboardClient, MomentoResult};
 
 /// Request to delete a leaderboard
 ///
@@ -18,7 +17,7 @@ pub struct DeleteLeaderboardRequest {
 }
 
 impl DeleteLeaderboardRequest {
-    /// Constructs a new DeleteCacheRequest.
+    /// Constructs a new `DeleteLeaderboardRequest`.
     pub fn new(cache_name: impl Into<String>, leaderboard: impl Into<String>) -> Self {
         Self {
             cache_name: cache_name.into(),
@@ -28,21 +27,25 @@ impl DeleteLeaderboardRequest {
 }
 
 impl MomentoRequest for DeleteLeaderboardRequest {
-    type Response = ();
+    type Response = DeleteLeaderboardResponse;
 
-    async fn send(self, cache_client: &CacheClient) -> MomentoResult<Self::Response> {
+    async fn send(self, leaderboard_client: &LeaderboardClient) -> MomentoResult<Self::Response> {
         let cache_name = &self.cache_name;
 
         utils::is_cache_name_valid(cache_name)?;
-        let request = Request::new(control_client::DeleteCacheRequest {
+        let request = Request::new(momento_protos::leaderboard::DeleteLeaderboardRequest {
             cache_name: cache_name.to_string(),
+            leaderboard: self.leaderboard.to_string(),
         });
 
-        let _ = cache_client.control_client().delete_cache(request).await?;
-        Ok(DeleteCacheResponse {})
+        let _ = leaderboard_client
+            .next_data_client()
+            .delete_leaderboard(request)
+            .await?;
+        Ok(Self::Response {})
     }
 }
 
-/// The response type for a successful delete cache request
+/// The response type for a successful `DeleteLeaderboardRequest`
 #[derive(Debug, PartialEq, Eq)]
-pub struct DeleteCacheResponse {}
+pub struct DeleteLeaderboardResponse {}

@@ -1,11 +1,9 @@
-
-
 use crate::leaderboard::LeaderboardClient;
 
 use momento_protos::leaderboard::leaderboard_client::LeaderboardClient as SLbClient;
 
-use crate::leaderboard::Configuration;
 use crate::grpc::header_interceptor::HeaderInterceptor;
+use crate::leaderboard::Configuration;
 use crate::{utils, CredentialProvider, MomentoResult};
 use tonic::codegen::InterceptedService;
 
@@ -17,7 +15,7 @@ use tonic::transport::Channel;
 
 pub struct LeaderboardClientBuilder<State>(pub State);
 
-pub struct NeedsConfiguration { }
+pub struct NeedsConfiguration {}
 
 pub struct NeedsCredentialProvider {
     configuration: Configuration,
@@ -52,7 +50,10 @@ impl LeaderboardClientBuilder<NeedsCredentialProvider> {
 }
 
 impl LeaderboardClientBuilder<ReadyToBuild> {
-    pub fn with_num_connections(self, num_connections: usize) -> LeaderboardClientBuilder<ReadyToBuild> {
+    pub fn with_num_connections(
+        self,
+        num_connections: usize,
+    ) -> LeaderboardClientBuilder<ReadyToBuild> {
         let grpc_configuration = self.0.configuration.transport_strategy.grpc_configuration;
         let transport_strategy = TransportStrategy {
             grpc_configuration: GrpcConfiguration {

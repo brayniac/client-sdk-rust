@@ -1,14 +1,25 @@
-use super::{IntoIds, Order, RankedElement};
-
+use crate::LeaderboardClient;
 use crate::leaderboard::MomentoRequest;
 use crate::utils::prep_request_with_timeout;
-use crate::LeaderboardClient;
 use crate::MomentoResult;
 
-pub struct GetRankRequest {
+use crate::leaderboard::messages::data::{Order, IntoIds};
+
+/// Represents an element in a leaderboard.
+#[derive(Debug, PartialEq, Clone)]
+pub struct RankedElement {
+    /// The id of the element.
+    pub id: u32,
+    // The rank of the element within the leaderboard.
+    pub rank: u32,
+    /// The score associated with the element.
+    pub score: f64,
+}
+
+pub struct GetByRankRequest {
     cache_name: String,
     leaderboard: String,
-    ids: Vec<u32>,
+    rank_range: Option<RankRange>,
     order: Order,
 }
 
@@ -34,7 +45,9 @@ impl GetRankResponse {
     }
 }
 
-impl MomentoRequest for GetRankRequest {
+impl MomentoRequest
+    for GetRankRequest
+{
     type Response = GetRankResponse;
 
     async fn send(self, leaderboard_client: &LeaderboardClient) -> MomentoResult<Self::Response> {
@@ -58,15 +71,7 @@ impl MomentoRequest for GetRankRequest {
             .into_inner();
 
         Ok(GetRankResponse {
-            elements: response
-                .elements
-                .iter()
-                .map(|v| RankedElement {
-                    id: v.id,
-                    rank: v.rank,
-                    score: v.score,
-                })
-                .collect(),
+            elements: response.elements.iter().map(|v| RankedElement { id: v.id, rank: v.rank, score: v.score}).collect()
         })
     }
 }

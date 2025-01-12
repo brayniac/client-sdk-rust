@@ -1,8 +1,8 @@
 use std::time::Duration;
 
-use crate::leaderboard::Configuration;
 use crate::config::grpc_configuration::GrpcConfiguration;
 use crate::config::transport_strategy::TransportStrategy;
+use crate::leaderboard::Configuration;
 
 /// Provides defaults suitable for a medium-to-high-latency dev environment. Permissive timeouts
 /// and relaxed latency and throughput targets.
