@@ -1,4 +1,7 @@
 pub mod delete_leaderboard;
+pub mod get_by_rank;
+pub mod get_by_score;
+pub mod get_leaderboard_length;
 pub mod get_rank;
 pub mod upsert_elements;
 

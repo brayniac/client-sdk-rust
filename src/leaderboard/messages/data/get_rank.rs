@@ -18,11 +18,16 @@ pub struct GetRankResponse {
 
 impl GetRankRequest {
     /// Constructs a new SortedSetPutElementsRequest.
-    pub fn new(cache_name: String, leaderboard: String, ids: Vec<u32>, order: Order) -> Self {
+    pub fn new(
+        cache_name: impl Into<String>,
+        leaderboard: impl Into<String>,
+        ids: impl Into<Vec<u32>>,
+        order: Order,
+    ) -> Self {
         Self {
-            cache_name,
-            leaderboard,
-            ids,
+            cache_name: cache_name.into(),
+            leaderboard: leaderboard.into(),
+            ids: ids.into(),
             order,
         }
     }

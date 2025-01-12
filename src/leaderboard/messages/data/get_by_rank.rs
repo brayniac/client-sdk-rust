@@ -1,19 +1,32 @@
-use crate::LeaderboardClient;
 use crate::leaderboard::MomentoRequest;
 use crate::utils::prep_request_with_timeout;
+use crate::LeaderboardClient;
 use crate::MomentoResult;
+use std::ops::Range;
 
-use crate::leaderboard::messages::data::{Order, IntoIds};
+use super::{Order, RankedElement};
 
-/// Represents an element in a leaderboard.
-#[derive(Debug, PartialEq, Clone)]
-pub struct RankedElement {
-    /// The id of the element.
-    pub id: u32,
-    // The rank of the element within the leaderboard.
-    pub rank: u32,
-    /// The score associated with the element.
-    pub score: f64,
+pub struct RankRange {
+    pub start_inclusive: u32,
+    pub end_exclusive: u32,
+}
+
+impl From<Range<u32>> for RankRange {
+    fn from(val: std::ops::Range<u32>) -> Self {
+        RankRange {
+            start_inclusive: val.start,
+            end_exclusive: val.end,
+        }
+    }
+}
+
+impl From<RankRange> for momento_protos::leaderboard::RankRange {
+    fn from(val: RankRange) -> Self {
+        momento_protos::leaderboard::RankRange {
+            start_inclusive: val.start_inclusive,
+            end_exclusive: val.end_exclusive,
+        }
+    }
 }
 
 pub struct GetByRankRequest {
@@ -23,55 +36,65 @@ pub struct GetByRankRequest {
     order: Order,
 }
 
-pub struct GetRankResponse {
+pub struct GetByRankResponse {
     elements: Vec<RankedElement>,
 }
 
-impl GetRankRequest {
+impl GetByRankRequest {
     /// Constructs a new SortedSetPutElementsRequest.
-    pub fn new(cache_name: String, leaderboard: String, ids: Vec<u32>, order: Order) -> Self {
+    pub fn new(
+        cache_name: impl Into<String>,
+        leaderboard: impl Into<String>,
+        rank_range: impl Into<Option<RankRange>>,
+        order: Order,
+    ) -> Self {
         Self {
-            cache_name,
-            leaderboard,
-            ids,
+            cache_name: cache_name.into(),
+            leaderboard: leaderboard.into(),
+            rank_range: rank_range.into(),
             order,
         }
     }
 }
 
-impl GetRankResponse {
+impl GetByRankResponse {
     pub fn elements(&self) -> &[RankedElement] {
         &self.elements
     }
 }
 
-impl MomentoRequest
-    for GetRankRequest
-{
-    type Response = GetRankResponse;
+impl MomentoRequest for GetByRankRequest {
+    type Response = GetByRankResponse;
 
     async fn send(self, leaderboard_client: &LeaderboardClient) -> MomentoResult<Self::Response> {
-        let ids = self.ids.into_ids();
         let cache_name = self.cache_name.clone();
         let request = prep_request_with_timeout(
             &self.cache_name,
             leaderboard_client.deadline_millis(),
-            momento_protos::leaderboard::GetRankRequest {
+            momento_protos::leaderboard::GetByRankRequest {
                 cache_name,
                 leaderboard: self.leaderboard,
-                ids,
+                rank_range: self.rank_range.map(|v| v.into()),
                 order: self.order as i32,
             },
         )?;
 
         let response = leaderboard_client
             .next_data_client()
-            .get_rank(request)
+            .get_by_rank(request)
             .await?
             .into_inner();
 
-        Ok(GetRankResponse {
-            elements: response.elements.iter().map(|v| RankedElement { id: v.id, rank: v.rank, score: v.score}).collect()
+        Ok(Self::Response {
+            elements: response
+                .elements
+                .iter()
+                .map(|v| RankedElement {
+                    id: v.id,
+                    rank: v.rank,
+                    score: v.score,
+                })
+                .collect(),
         })
     }
 }

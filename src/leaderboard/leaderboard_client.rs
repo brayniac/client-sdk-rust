@@ -1,6 +1,16 @@
 use crate::grpc::header_interceptor::HeaderInterceptor;
 use crate::leaderboard::leaderboard_client_builder::LeaderboardClientBuilder;
 use crate::leaderboard::leaderboard_client_builder::NeedsConfiguration;
+use crate::leaderboard::messages::data::delete_leaderboard::DeleteLeaderboardRequest;
+use crate::leaderboard::messages::data::delete_leaderboard::DeleteLeaderboardResponse;
+use crate::leaderboard::messages::data::get_by_rank::GetByRankRequest;
+use crate::leaderboard::messages::data::get_by_rank::GetByRankResponse;
+use crate::leaderboard::messages::data::get_by_rank::RankRange;
+use crate::leaderboard::messages::data::get_by_score::GetByScoreRequest;
+use crate::leaderboard::messages::data::get_by_score::GetByScoreResponse;
+use crate::leaderboard::messages::data::get_by_score::ScoreRange;
+use crate::leaderboard::messages::data::get_leaderboard_length::GetLeaderboardLengthRequest;
+use crate::leaderboard::messages::data::get_leaderboard_length::GetLeaderboardLengthResponse;
 use crate::leaderboard::messages::data::get_rank::{GetRankRequest, GetRankResponse};
 use crate::leaderboard::messages::data::upsert_elements::IntoElements;
 use crate::leaderboard::messages::data::upsert_elements::UpsertElementsRequest;
@@ -18,7 +28,7 @@ use tonic::transport::Channel;
 
 static NEXT_DATA_CLIENT_INDEX: AtomicUsize = AtomicUsize::new(0);
 
-pub use crate::leaderboard::messages::data::{IntoIds, Order};
+pub use crate::leaderboard::messages::data::Order;
 
 #[derive(Clone, Debug)]
 pub struct LeaderboardClient {
@@ -33,24 +43,63 @@ impl LeaderboardClient {
         LeaderboardClientBuilder(NeedsConfiguration {})
     }
 
-    // pub async fn sorted_set_put_elements<V: IntoBytes>(
-    //     &self,
-    //     cache_name: impl Into<String>,
-    //     sorted_set_name: impl IntoBytes,
-    //     elements: impl IntoElements<V>,
-    // ) -> MomentoResult<SortedSetPutElementsResponse> {
-    //     let request = SortedSetPutElementsRequest::new(cache_name, sorted_set_name, elements);
-    //     request.send(self).await
-    // }
-
-    pub async fn get_rank<T: IntoIds>(
+    pub async fn delete_leaderboard(
         &self,
-        cache_name: String,
-        leaderboard: String,
-        ids: impl IntoIds,
+        cache_name: impl Into<String>,
+        leaderboard: impl Into<String>,
+    ) -> MomentoResult<DeleteLeaderboardResponse> {
+        let request = DeleteLeaderboardRequest::new(cache_name, leaderboard);
+        request.send(self).await
+    }
+
+    pub async fn get_by_rank(
+        &self,
+        cache_name: impl Into<String>,
+        leaderboard: impl Into<String>,
+        rank_range: impl Into<Option<RankRange>>,
+        order: Order,
+    ) -> MomentoResult<GetByRankResponse> {
+        let request = GetByRankRequest::new(cache_name, leaderboard, rank_range, order);
+        request.send(self).await
+    }
+
+    pub async fn get_by_score(
+        &self,
+        cache_name: impl Into<String>,
+        leaderboard: impl Into<String>,
+        score_range: impl Into<Option<ScoreRange>>,
+        offset: u32,
+        limit_elements: u32,
+        order: Order,
+    ) -> MomentoResult<GetByScoreResponse> {
+        let request = GetByScoreRequest::new(
+            cache_name,
+            leaderboard,
+            score_range,
+            offset,
+            limit_elements,
+            order,
+        );
+        request.send(self).await
+    }
+
+    pub async fn get_leaderboard_length(
+        &self,
+        cache_name: impl Into<String>,
+        leaderboard: impl Into<String>,
+    ) -> MomentoResult<GetLeaderboardLengthResponse> {
+        let request = GetLeaderboardLengthRequest::new(cache_name, leaderboard);
+        request.send(self).await
+    }
+
+    pub async fn get_rank<T: Into<Vec<u32>>>(
+        &self,
+        cache_name: impl Into<String>,
+        leaderboard: impl Into<String>,
+        ids: T,
         order: Order,
     ) -> MomentoResult<GetRankResponse> {
-        let request = GetRankRequest::new(cache_name, leaderboard, ids.into_ids(), order);
+        let request = GetRankRequest::new(cache_name, leaderboard, ids, order);
         request.send(self).await
     }
 
@@ -58,7 +107,7 @@ impl LeaderboardClient {
         &self,
         cache_name: impl Into<String>,
         leaderboard: impl Into<String>,
-        elements: impl IntoElements,
+        elements: E,
     ) -> MomentoResult<Empty> {
         let request = UpsertElementsRequest::new(cache_name, leaderboard, elements);
         request.send(self).await
