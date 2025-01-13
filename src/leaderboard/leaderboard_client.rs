@@ -15,12 +15,15 @@ use crate::leaderboard::messages::data::get_leaderboard_length::{
     GetLeaderboardLengthRequest, GetLeaderboardLengthResponse,
 };
 use crate::leaderboard::messages::data::get_rank::{GetRankRequest, GetRankResponse};
-use crate::leaderboard::messages::data::remove_elements::RemoveElementsRequest;
-use crate::leaderboard::messages::data::upsert_elements::{IntoElements, UpsertElementsRequest};
+use crate::leaderboard::messages::data::remove_elements::{
+    RemoveElementsRequest, RemoveElementsResponse,
+};
+use crate::leaderboard::messages::data::upsert_elements::{
+    IntoElements, UpsertElementsRequest, UpsertElementsResponse,
+};
 use crate::leaderboard::{Configuration, MomentoRequest};
 use crate::MomentoResult;
 
-use momento_protos::common::Empty;
 use momento_protos::control_client::scs_control_client::ScsControlClient;
 use momento_protos::leaderboard::leaderboard_client::LeaderboardClient as SLbClient;
 use tonic::codegen::InterceptedService;
@@ -111,7 +114,7 @@ impl LeaderboardClient {
         cache_name: impl Into<String>,
         leaderboard: impl Into<String>,
         ids: T,
-    ) -> MomentoResult<Empty> {
+    ) -> MomentoResult<RemoveElementsResponse> {
         let request = RemoveElementsRequest::new(cache_name, leaderboard, ids);
         request.send(self).await
     }
@@ -121,7 +124,7 @@ impl LeaderboardClient {
         cache_name: impl Into<String>,
         leaderboard: impl Into<String>,
         elements: E,
-    ) -> MomentoResult<Empty> {
+    ) -> MomentoResult<UpsertElementsResponse> {
         let request = UpsertElementsRequest::new(cache_name, leaderboard, elements);
         request.send(self).await
     }

@@ -10,10 +10,6 @@ pub struct GetRankRequest {
     order: Order,
 }
 
-pub struct GetRankResponse {
-    elements: Vec<RankedElement>,
-}
-
 impl GetRankRequest {
     /// Constructs a new SortedSetPutElementsRequest.
     pub fn new(
@@ -28,12 +24,6 @@ impl GetRankRequest {
             ids: ids.into(),
             order,
         }
-    }
-}
-
-impl GetRankResponse {
-    pub fn elements(&self) -> &[RankedElement] {
-        &self.elements
     }
 }
 
@@ -60,7 +50,7 @@ impl MomentoRequest for GetRankRequest {
             .await?
             .into_inner();
 
-        Ok(GetRankResponse {
+        Ok(Self::Response {
             elements: response
                 .elements
                 .iter()
@@ -71,5 +61,16 @@ impl MomentoRequest for GetRankRequest {
                 })
                 .collect(),
         })
+    }
+}
+
+/// The response type for a successful `GetRankRequest`
+pub struct GetRankResponse {
+    elements: Vec<RankedElement>,
+}
+
+impl GetRankResponse {
+    pub fn elements(&self) -> &[RankedElement] {
+        &self.elements
     }
 }

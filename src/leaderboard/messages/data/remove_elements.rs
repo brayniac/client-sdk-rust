@@ -2,8 +2,6 @@ use crate::leaderboard::MomentoRequest;
 use crate::utils::prep_request_with_timeout;
 use crate::{LeaderboardClient, MomentoResult};
 
-use momento_protos::common::Empty;
-
 pub struct RemoveElementsRequest {
     cache_name: String,
     leaderboard: String,
@@ -26,7 +24,7 @@ impl RemoveElementsRequest {
 }
 
 impl MomentoRequest for RemoveElementsRequest {
-    type Response = Empty;
+    type Response = RemoveElementsResponse;
 
     async fn send(self, leaderboard_client: &LeaderboardClient) -> MomentoResult<Self::Response> {
         let cache_name = self.cache_name.clone();
@@ -44,6 +42,10 @@ impl MomentoRequest for RemoveElementsRequest {
             .next_data_client()
             .remove_elements(request)
             .await?;
-        Ok(Empty {})
+        Ok(Self::Response {})
     }
 }
+
+/// The response type for a successful `RemoveElementsRequest`
+#[derive(Debug, PartialEq, Eq)]
+pub struct RemoveElementsResponse {}

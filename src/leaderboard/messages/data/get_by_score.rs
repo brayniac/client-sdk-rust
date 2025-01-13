@@ -73,6 +73,7 @@ impl GetByScoreRequest {
     }
 }
 
+/// The response type for a successful `GetByScoreRequest`
 impl GetByScoreResponse {
     pub fn elements(&self) -> &[RankedElement] {
         &self.elements

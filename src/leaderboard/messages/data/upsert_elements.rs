@@ -2,7 +2,6 @@ use crate::leaderboard::MomentoRequest;
 use crate::utils::prep_request_with_timeout;
 use crate::{LeaderboardClient, MomentoResult};
 
-use momento_protos::common::Empty;
 use momento_protos::leaderboard::Element as ProtoElement;
 
 /// This trait defines an interface for converting a type into a vector of [SortedSetElement].
@@ -53,7 +52,7 @@ impl<E: IntoElements> UpsertElementsRequest<E> {
 }
 
 impl<E: IntoElements> MomentoRequest for UpsertElementsRequest<E> {
-    type Response = Empty;
+    type Response = UpsertElementsResponse;
 
     async fn send(self, leaderboard_client: &LeaderboardClient) -> MomentoResult<Self::Response> {
         let elements = self.elements.into_elements();
@@ -78,6 +77,10 @@ impl<E: IntoElements> MomentoRequest for UpsertElementsRequest<E> {
             .next_data_client()
             .upsert_elements(request)
             .await?;
-        Ok(Empty {})
+        Ok(Self::Response {})
     }
 }
+
+/// The response type for a successful `DeleteLeaderboardRequest`
+#[derive(Debug, PartialEq, Eq)]
+pub struct UpsertElementsResponse {}

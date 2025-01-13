@@ -50,7 +50,7 @@ impl MomentoRequest for GetLeaderboardLengthRequest {
     }
 }
 
-/// The response type for a successful `DeleteLeaderboardRequest`
+/// The response type for a successful `GetLeaderboardLengthRequest`
 #[derive(Debug, PartialEq, Eq)]
 pub struct GetLeaderboardLengthResponse {
     count: u32,
