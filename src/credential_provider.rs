@@ -128,6 +128,42 @@ impl CredentialProvider {
 }
 
 fn decode_auth_token(auth_token: String) -> MomentoResult<CredentialProvider> {
+    // Check if we're in local testing mode
+    if std::env::var("MOMENTO_LOCAL_TESTING").is_ok() {
+        // For local testing, accept any token and use environment overrides
+        let endpoint = std::env::var("MOMENTO_ENDPOINT_OVERRIDE")
+            .unwrap_or_else(|_| "http://127.0.0.1:5701".to_string());
+
+        let endpoint = if endpoint.starts_with("http://") || endpoint.starts_with("https://") {
+            endpoint
+        } else {
+            format!("http://{}", endpoint)
+        };
+
+        // In local testing mode, try to extract the api_key from the token if it's a valid JSON
+        let actual_token =
+            if let Ok(decoded) = base64::engine::general_purpose::URL_SAFE.decode(&auth_token) {
+                if let Ok(json_str) = String::from_utf8(decoded) {
+                    if let Ok(token_data) = serde_json::from_str::<V1Token>(&json_str) {
+                        token_data.api_key
+                    } else {
+                        auth_token.clone()
+                    }
+                } else {
+                    auth_token.clone()
+                }
+            } else {
+                auth_token.clone()
+            };
+
+        return Ok(CredentialProvider {
+            auth_token: actual_token,
+            cache_endpoint: endpoint.clone(),
+            control_endpoint: endpoint.clone(),
+            token_endpoint: endpoint,
+        });
+    }
+
     let auth_token_bytes = base64::engine::general_purpose::URL_SAFE
         .decode(auth_token)
         .map_err(|e| token_parsing_error(Box::new(e)))?;
@@ -138,11 +174,34 @@ fn process_v1_token(auth_token_bytes: Vec<u8>) -> MomentoResult<CredentialProvid
     let json: V1Token =
         serde_json::from_slice(&auth_token_bytes).map_err(|e| token_parsing_error(Box::new(e)))?;
 
+    // Check for environment variable overrides
+    let endpoint_override = std::env::var("MOMENTO_ENDPOINT_OVERRIDE").ok();
+
+    let (cache_endpoint, control_endpoint, token_endpoint) =
+        if let Some(override_endpoint) = endpoint_override {
+            // Use the override for all endpoints
+            let endpoint = if override_endpoint.starts_with("http://")
+                || override_endpoint.starts_with("https://")
+            {
+                override_endpoint
+            } else {
+                format!("http://{}", override_endpoint)
+            };
+            (endpoint.clone(), endpoint.clone(), endpoint)
+        } else {
+            // Use the original endpoints from token
+            (
+                https_endpoint(get_cache_endpoint(&json.endpoint)),
+                https_endpoint(get_control_endpoint(&json.endpoint)),
+                https_endpoint(get_token_endpoint(&json.endpoint)),
+            )
+        };
+
     Ok(CredentialProvider {
         auth_token: json.api_key,
-        cache_endpoint: https_endpoint(get_cache_endpoint(&json.endpoint)),
-        control_endpoint: https_endpoint(get_control_endpoint(&json.endpoint)),
-        token_endpoint: https_endpoint(get_token_endpoint(&json.endpoint)),
+        cache_endpoint,
+        control_endpoint,
+        token_endpoint,
     })
 }
 

@@ -150,10 +150,17 @@ impl From<ChannelConnectError> for MomentoError {
 
 pub(crate) fn connect_channel_lazily(uri_string: &str) -> Result<Channel, ChannelConnectError> {
     let uri = Uri::try_from(uri_string)?;
-    let endpoint = Channel::builder(uri)
+    let mut endpoint = Channel::builder(uri)
         .keep_alive_while_idle(true)
-        .http2_keep_alive_interval(time::Duration::from_secs(30))
-        .tls_config(ClientTlsConfig::default().with_webpki_roots())?;
+        .http2_keep_alive_interval(time::Duration::from_secs(30));
+
+    // Skip TLS in local testing mode
+    if std::env::var("MOMENTO_LOCAL_TESTING").is_ok() {
+        // Don't add TLS config
+    } else {
+        endpoint = endpoint.tls_config(ClientTlsConfig::default().with_webpki_roots())?;
+    }
+
     Ok(endpoint.connect_lazy())
 }
 
@@ -162,8 +169,13 @@ pub(crate) fn connect_channel_lazily_configurable(
     grpc_config: GrpcConfiguration,
 ) -> Result<Channel, ChannelConnectError> {
     let uri = Uri::try_from(uri_string)?;
-    let mut channel_builder =
-        Channel::builder(uri).tls_config(ClientTlsConfig::default().with_webpki_roots())?;
+    let mut channel_builder = Channel::builder(uri);
+
+    // Skip TLS in local testing mode
+    if !std::env::var("MOMENTO_LOCAL_TESTING").is_ok() {
+        channel_builder =
+            channel_builder.tls_config(ClientTlsConfig::default().with_webpki_roots())?;
+    }
     if let Some(keep_alive_while_idle) = grpc_config.keep_alive_while_idle {
         channel_builder = channel_builder.keep_alive_while_idle(keep_alive_while_idle);
     }
